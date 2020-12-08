@@ -9,46 +9,35 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var xianShilabel: UILabel!
-    @IBOutlet weak var renminbiTextfield: UITextField!
-    @IBOutlet weak var ruyuanTextField: UITextField!
+    @IBOutlet weak var rmbLabel: UILabel!
+    @IBOutlet weak var ryLabel: UILabel!
+    @IBOutlet weak var jineTextfield: UITextField!
     var hueilv: Double = 0
     override func viewDidLoad() {
         super.viewDidLoad()
-        api()
-        renminbiTextfield.delegate = self
-        renminbiTextfield.tag = 1
-        ruyuanTextField.delegate = self
-        ruyuanTextField.tag = 2
+        jineTextfield.delegate = self
+        hueilv = UserDefaults.standard.double(forKey: "huilu")
     }
-    func api(){
-        do {
-            try ApiClient.huilvApi(completion: { data in
-                if let num: Double = Double( data.result.rate ) {
-                    self.hueilv = num
-                }
-            })
-        } catch {
-            xianShilabel.text = error.localizedDescription
-        }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let num:Double = 100
+        ryLabel.text = xiaoshudian(data: Double(num/hueilv))
+        rmbLabel.text = xiaoshudian(data: Double(num*hueilv))
     }
-
+    
+    func xiaoshudian(data:Double) -> String{
+        let str = String(format: "%.2f", data)
+        return str
+    }
 }
 
 extension ViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        if hueilv != 0 {
-            let text = (textField.text! as NSString).replacingCharacters(in: range, with: string)
-            guard let num:Double = Double(text) else {return true}
-            //inputview个性化设置
-            switch textField.tag {
-            case 1:
-                xianShilabel.text = "\(Int(num/hueilv))"
-            case 2:
-                xianShilabel.text = "\(Int(num*hueilv))"
-            default:break
-            }
-        }
+        let text = (textField.text! as NSString).replacingCharacters(in: range, with: string)
+        let num:Double = text.isEmpty ? 100 : Double(text)!
+        //inputview个性化设置
+        ryLabel.text = xiaoshudian(data: Double(num/hueilv))
+        rmbLabel.text = xiaoshudian(data: Double(num*hueilv))
         return true
     }
 }
